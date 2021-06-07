@@ -47,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 hitDir, leftHit, rightHit, forwardHit, backwardsHit;
 
     //is player looking to the right?
-    private bool lookingRight = true;
+    public bool lookingRight = true;
     //is player next too a wall?
     private bool foundWall;
     //is the player on a wall?
@@ -169,7 +169,7 @@ public class PlayerMovement : MonoBehaviour
                 rb.AddForce(Vector3.up * jumpHeight);
             }
             //run raycast to check for ground
-            else if (Physics.Raycast(rb.transform.position, hitDir, out floor, groundDist))
+            else if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
             {
                 if (floor.transform.tag == "floor" || floor.transform.tag == "wall")
                 {
