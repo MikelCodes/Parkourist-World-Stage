@@ -58,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
         //seting direction of raycast directly down
         hitDir = new Vector3(0, -90, 0);
         leftHit = new Vector3(0, 0, -90); 
-        rightHit = new Vector3(0, 0, -90); 
+        rightHit = new Vector3(0, 0, 90); 
         forwardHit = new Vector3(90, 0, 0); 
         backwardsHit = new Vector3(-90, 0, 0);
     }
@@ -159,14 +159,16 @@ public class PlayerMovement : MonoBehaviour
             if (foundWall == true && onWall == true)
             {
                 //jumps
+            
                 rb.AddForce(transform.up * jumpHeight);
             }
             //run raycast to check for ground
             else if (Physics.Raycast(rb.transform.position, hitDir, out floor, groundDist))
             {
-                if (floor.transform.tag == "floor")
+                if (floor.transform.tag == "floor" || floor.transform.tag == "wall")
                 {
                     //jumps
+
                     rb.AddForce(transform.up * jumpHeight);
                 }
             }
