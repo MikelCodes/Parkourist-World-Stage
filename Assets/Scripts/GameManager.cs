@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
 
     bool paused = false;
+    public float score;
     // Update is called once per frame
 
     void Update()

@@ -46,16 +46,19 @@ public class PlayerMovement : MonoBehaviour
     //making a vector 3 for direction of ground
     private Vector3 hitDir, leftHit, rightHit, forwardHit, backwardsHit;
 
+    //is player looking to the right?
     private bool lookingRight = true;
+    //is player next too a wall?
     private bool foundWall;
+    //is the player on a wall?
     private bool onWall;
 
-    [SerializeField]
-    private float yAngle;
+    //angle ontop of intial angle
+    public float yAngle;
 
     void Start()
     {
-        //seting direction of raycast directly down
+        //seting direction of raycasts, one every direction except up
         hitDir = new Vector3(0, -90, 0);
         leftHit = new Vector3(0, 0, -90); 
         rightHit = new Vector3(0, 0, 90); 
@@ -68,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
         //run keyPressed
         keyPressed();
 
-        // Trying to Limit Speed
+        // Limiting Speed
         if (rb.velocity.magnitude > maxSpeed)
         {
             rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
@@ -114,6 +117,8 @@ public class PlayerMovement : MonoBehaviour
 
         //stores raycast hit data in 'wall'
         RaycastHit wall;
+
+        //raycasts to check if there is a wall next to the player ( can be optomised)
         if (Physics.Raycast(rb.transform.position, leftHit, out wall, groundDist))
         {
             if (wall.transform.tag == "wall")
@@ -144,7 +149,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-
+        //set the player to the wall
         if (Input.GetKey(wallGrab) && foundWall == true)
         {
             rb.constraints = RigidbodyConstraints.FreezePositionY;
@@ -156,11 +161,12 @@ public class PlayerMovement : MonoBehaviour
         //if pressing jump key
         if (Input.GetKey(jump))
         {
+            //if on a wall, the player can jump
             if (foundWall == true && onWall == true)
             {
                 //jumps
             
-                rb.AddForce(transform.up * jumpHeight);
+                rb.AddForce(Vector3.up * jumpHeight);
             }
             //run raycast to check for ground
             else if (Physics.Raycast(rb.transform.position, hitDir, out floor, groundDist))
@@ -169,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
                 {
                     //jumps
 
-                    rb.AddForce(transform.up * jumpHeight);
+                    rb.AddForce(Vector3.up * jumpHeight);
                 }
             }
 
