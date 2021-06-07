@@ -47,6 +47,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 hitDir, leftHit, rightHit, forwardHit, backwardsHit;
 
     private bool lookingRight = true;
+    private bool foundWall;
+    private bool onWall;
 
     [SerializeField]
     private float yAngle;
@@ -107,39 +109,46 @@ public class PlayerMovement : MonoBehaviour
             //Debug.Log(transform.rotation.y);
         }
 
+        foundWall = false;
+        onWall = false;
 
         //stores raycast hit data in 'wall'
         RaycastHit wall;
-        if (Input.GetKey(wallGrab))
+        if (Physics.Raycast(rb.transform.position, leftHit, out wall, groundDist))
         {
-            if (Physics.Raycast(rb.transform.position, leftHit, out wall, groundDist))
+            if (wall.transform.tag == "wall")
             {
-                if (wall.transform.tag == "wall")
-                {
-                    rb.constraints = RigidbodyConstraints.FreezePositionY;
-                }
+
+                foundWall = true;
             }
-            if (Physics.Raycast(rb.transform.position, rightHit, out wall, groundDist))
+        }
+        if (Physics.Raycast(rb.transform.position, rightHit, out wall, groundDist))
+        {
+            if (wall.transform.tag == "wall")
             {
-                if (wall.transform.tag == "wall")
-                {
-                    rb.constraints = RigidbodyConstraints.FreezePositionY;
-                }
+                foundWall = true;
             }
-            if (Physics.Raycast(rb.transform.position, backwardsHit, out wall, groundDist))
+        }
+        if (Physics.Raycast(rb.transform.position, backwardsHit, out wall, groundDist))
+        {
+            if (wall.transform.tag == "wall")
             {
-                if (wall.transform.tag == "wall")
-                {
-                    rb.constraints = RigidbodyConstraints.FreezePositionY;
-                }
+                foundWall = true;
             }
-            if (Physics.Raycast(rb.transform.position, forwardHit, out wall, groundDist))
+        }
+        if (Physics.Raycast(rb.transform.position, forwardHit, out wall, groundDist))
+        {
+            if (wall.transform.tag == "wall")
             {
-                if (wall.transform.tag == "wall")
-                {
-                    rb.constraints = RigidbodyConstraints.FreezePositionY;
-                }
+                foundWall = true;
             }
+        }
+
+
+        if (Input.GetKey(wallGrab) && foundWall == true)
+        {
+            rb.constraints = RigidbodyConstraints.FreezePositionY;
+            onWall = true;
         }
 
         //stores raycast hit data in 'floor'
@@ -147,8 +156,13 @@ public class PlayerMovement : MonoBehaviour
         //if pressing jump key
         if (Input.GetKey(jump))
         {
+            if (foundWall == true && onWall == true)
+            {
+                //jumps
+                rb.AddForce(transform.up * jumpHeight);
+            }
             //run raycast to check for ground
-            if (Physics.Raycast(rb.transform.position, hitDir, out floor, groundDist))
+            else if (Physics.Raycast(rb.transform.position, hitDir, out floor, groundDist))
             {
                 if (floor.transform.tag == "floor")
                 {
