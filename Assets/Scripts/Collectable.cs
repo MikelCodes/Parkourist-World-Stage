@@ -6,7 +6,7 @@ public class Collectable : MonoBehaviour
 {
     [SerializeField]
     private float points;
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collision)
     {
         collision.gameObject.GetComponent<GameManager>().score += points;
         Destroy(gameObject);
