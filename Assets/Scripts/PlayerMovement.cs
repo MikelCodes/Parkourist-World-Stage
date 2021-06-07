@@ -44,7 +44,7 @@ public class PlayerMovement : MonoBehaviour
     private float maxSpeed = 30f;
 
     //making a vector 3 for direction of ground
-    private Vector3 hitDir;
+    private Vector3 hitDir, leftHit, rightHit, forwardHit, backwardsHit;
 
     private bool lookingRight = true;
 
@@ -55,6 +55,10 @@ public class PlayerMovement : MonoBehaviour
     {
         //seting direction of raycast directly down
         hitDir = new Vector3(0, -90, 0);
+        leftHit = new Vector3(0, 0, -90); 
+        rightHit = new Vector3(0, 0, -90); 
+        forwardHit = new Vector3(90, 0, 0); 
+        backwardsHit = new Vector3(-90, 0, 0);
     }
 
     void Update()
@@ -66,6 +70,11 @@ public class PlayerMovement : MonoBehaviour
         if (rb.velocity.magnitude > maxSpeed)
         {
             rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+        }
+
+        if (rb.constraints == RigidbodyConstraints.FreezePositionY)
+        {
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
     }
 
@@ -82,7 +91,7 @@ public class PlayerMovement : MonoBehaviour
                 transform.rotation = Quaternion.Euler(0, 0 + yAngle, 0);
             }
             rb.AddForce(transform.forward * moveSpeed);
-            Debug.Log(transform.rotation.y);
+            //Debug.Log(transform.rotation.y);
         }
 
         //if pressing backwards key
@@ -95,7 +104,7 @@ public class PlayerMovement : MonoBehaviour
                 transform.rotation = Quaternion.Euler(0, 180 + yAngle, 0);
             }
             rb.AddForce(transform.forward * moveSpeed);
-            Debug.Log(transform.rotation.y);
+            //Debug.Log(transform.rotation.y);
         }
 
 
@@ -103,18 +112,39 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit wall;
         if (Input.GetKey(wallGrab))
         {
-            if (Physics.Raycast(rb.transform.position, hitDir, out wall, groundDist))
+            if (Physics.Raycast(rb.transform.position, leftHit, out wall, groundDist))
             {
                 if (wall.transform.tag == "wall")
                 {
-                    //jumps
-                    rb.AddForce(transform.up * jumpHeight);
+                    rb.constraints = RigidbodyConstraints.FreezePositionY;
+                }
+            }
+            if (Physics.Raycast(rb.transform.position, rightHit, out wall, groundDist))
+            {
+                if (wall.transform.tag == "wall")
+                {
+                    rb.constraints = RigidbodyConstraints.FreezePositionY;
+                }
+            }
+            if (Physics.Raycast(rb.transform.position, backwardsHit, out wall, groundDist))
+            {
+                if (wall.transform.tag == "wall")
+                {
+                    rb.constraints = RigidbodyConstraints.FreezePositionY;
+                }
+            }
+            if (Physics.Raycast(rb.transform.position, forwardHit, out wall, groundDist))
+            {
+                if (wall.transform.tag == "wall")
+                {
+                    rb.constraints = RigidbodyConstraints.FreezePositionY;
                 }
             }
         }
 
-        //if pressing jump key
+        //stores raycast hit data in 'floor'
         RaycastHit floor;
+        //if pressing jump key
         if (Input.GetKey(jump))
         {
             //run raycast to check for ground
