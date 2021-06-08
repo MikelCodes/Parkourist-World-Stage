@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class PlayerMovement : MonoBehaviour
 {
     //getting key binds
@@ -9,36 +9,27 @@ public class PlayerMovement : MonoBehaviour
     //forward key
     [SerializeField]
     KeyCode forward = KeyCode.D;
-
     //backwards key
     [SerializeField]
     KeyCode backwards = KeyCode.A;
-
     //jump key
     [SerializeField]
     KeyCode jump = KeyCode.W;
-
     //wall climb key
     [SerializeField]
     KeyCode wallGrab = KeyCode.Space;
 
-
     //reference to rigidbody
     [SerializeField]
     private Rigidbody rb;
-
     [SerializeField]
     private float moveSpeed;
-
-
     //distance of raycast
     [SerializeField]
     private float groundDist;
-
     //seting the height of the jump
     [SerializeField]
     private float jumpHeight = 1600;
-
     //setting the maximum speed of any character
     [SerializeField]
     private float maxSpeed = 30f;
@@ -52,9 +43,16 @@ public class PlayerMovement : MonoBehaviour
     private bool foundWall;
     //is the player on a wall?
     private bool onWall;
-
     //angle ontop of intial angle
     public float yAngle;
+
+    [SerializeField]
+    private Slider attachBar;
+    [SerializeField]
+    private float attachMaxTime;
+
+    private float attachTime;
+    private bool canAttach;
 
     void Start()
     {
@@ -64,6 +62,8 @@ public class PlayerMovement : MonoBehaviour
         rightHit = new Vector3(0, 0, 90); 
         forwardHit = new Vector3(90, 0, 0); 
         backwardsHit = new Vector3(-90, 0, 0);
+        attachTime = attachMaxTime;
+        attachBar.gameObject.SetActive(false);
     }
 
     void Update()
@@ -77,10 +77,12 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
         }
 
+        //makes player deattach from the wall
         if (rb.constraints == RigidbodyConstraints.FreezePositionY)
         {
             rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
+        Debug.Log(attachTime);
     }
 
     //keyPressed
@@ -152,8 +154,18 @@ public class PlayerMovement : MonoBehaviour
         //set the player to the wall
         if (Input.GetKey(wallGrab) && foundWall == true)
         {
-            rb.constraints = RigidbodyConstraints.FreezePositionY;
-            onWall = true;
+            if (attachTime >= 0)
+            {
+                rb.constraints = RigidbodyConstraints.FreezePositionY;
+                onWall = true;
+                attachBar.gameObject.SetActive(true);
+                attachTime -= Time.deltaTime;
+                attachBar.value = attachTime / attachMaxTime;
+            }
+        }
+        else
+        {
+            attachBar.gameObject.SetActive(false);
         }
 
         //stores raycast hit data in 'floor'
@@ -176,6 +188,7 @@ public class PlayerMovement : MonoBehaviour
                     //jumps
 
                     rb.AddForce(Vector3.up * jumpHeight);
+                    attachTime = attachMaxTime;
                 }
             }
 
