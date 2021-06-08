@@ -53,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float attachTime;
     private bool canAttach;
+    private bool wallAhead;
 
     void Start()
     {
@@ -68,6 +69,9 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        //makes sure player falls
+        rb.AddForce(Vector3.down * 0.4f);
+
         //run keyPressed
         keyPressed();
 
@@ -90,14 +94,16 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
-        //Debug.Log(attachTime);
+        //Debug.Log(attachTime);        
     }
 
     //keyPressed
     void keyPressed()
     {
-        //if pressing forward key
-        if (Input.GetKey(forward))
+        RaycastHit floor;   
+
+            //if pressing forward key
+            if (Input.GetKey(forward))
         {
             if (lookingRight == false)
             {
@@ -105,8 +111,17 @@ public class PlayerMovement : MonoBehaviour
                 //Makes player look right
                 transform.rotation = Quaternion.Euler(0, 0 + yAngle, 0);
             }
-            rb.AddForce(transform.forward * moveSpeed);
+            if (wallAhead == true)
+            {
+                rb.AddForce(transform.forward * moveSpeed / 2);
+            }
+            else
+            {
+                rb.AddForce(transform.forward * moveSpeed);
+            }
+
             //Debug.Log(transform.rotation.y);
+
         }
 
         //if pressing backwards key
@@ -118,7 +133,14 @@ public class PlayerMovement : MonoBehaviour
                 //Makes player look left
                 transform.rotation = Quaternion.Euler(0, 180 + yAngle, 0);
             }
-            rb.AddForce(transform.forward * moveSpeed);
+            if (wallAhead == true)
+            {
+                rb.AddForce(transform.forward * moveSpeed / 2);
+            }
+            else
+            {
+                rb.AddForce(transform.forward * moveSpeed);
+            }
             //Debug.Log(transform.rotation.y);
         }
 
@@ -135,6 +157,7 @@ public class PlayerMovement : MonoBehaviour
             {
 
                 foundWall = true;
+                wallAhead = false;
             }
         }
         if (Physics.Raycast(rb.transform.position, rightHit, out wall, groundDist))
@@ -142,6 +165,7 @@ public class PlayerMovement : MonoBehaviour
             if (wall.transform.tag == "wall")
             {
                 foundWall = true;
+                wallAhead = true;
             }
         }
         if (Physics.Raycast(rb.transform.position, backwardsHit, out wall, groundDist))
@@ -149,6 +173,7 @@ public class PlayerMovement : MonoBehaviour
             if (wall.transform.tag == "wall")
             {
                 foundWall = true;
+                wallAhead = false;
             }
         }
         if (Physics.Raycast(rb.transform.position, forwardHit, out wall, groundDist))
@@ -156,6 +181,7 @@ public class PlayerMovement : MonoBehaviour
             if (wall.transform.tag == "wall")
             {
                 foundWall = true;
+                wallAhead = false;
             }
         }
 
@@ -177,7 +203,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //stores raycast hit data in 'floor'
-        RaycastHit floor;
+
         //if pressing jump key
         if (Input.GetKey(jump))
         {

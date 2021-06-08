@@ -12,8 +12,8 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        //Debug.Log(Time.timeScale);
-        if (Input.GetKey(KeyCode.Escape))
+        Debug.Log(Time.timeScale);
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (paused == false)            
             {
