@@ -71,18 +71,26 @@ public class PlayerMovement : MonoBehaviour
         //run keyPressed
         keyPressed();
 
-        // Limiting Speed
-        if (rb.velocity.magnitude > maxSpeed)
+        // Limiting Speed, slows you down more if your on a wall
+
+        if (onWall == true)
         {
-            rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+            if (rb.velocity.magnitude > maxSpeed/2)
+            {
+                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed/2);
+            }
         }
+        else if (rb.velocity.magnitude > maxSpeed)
+            {
+                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+            }
 
         //makes player deattach from the wall
         if (rb.constraints == RigidbodyConstraints.FreezePositionY)
         {
             rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
-        Debug.Log(attachTime);
+        //Debug.Log(attachTime);
     }
 
     //keyPressed
