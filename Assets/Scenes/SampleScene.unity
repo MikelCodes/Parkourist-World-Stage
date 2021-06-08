@@ -933,8 +933,8 @@ MonoBehaviour:
   wallGrab: 32
   rb: {fileID: 1317627677}
   moveSpeed: 2
-  groundDist: 1.1
-  jumpHeight: 40
+  groundDist: 1.0001
+  jumpHeight: 1500
   maxSpeed: 10
   lookingRight: 1
   yAngle: 0
@@ -1046,6 +1046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   score: 0
+  maxTime: 180
 --- !u!114 &1317627683
 MonoBehaviour:
   m_ObjectHideFlags: 0

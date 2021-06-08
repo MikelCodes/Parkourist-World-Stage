@@ -8,11 +8,19 @@ public class GameManager : MonoBehaviour
 
     bool paused = false;
     public float score;
-    // Update is called once per frame
+    protected float timeRemaining;
+
+    [SerializeField]
+    protected int maxTime;
+
+    private void Start()
+    {
+        timeRemaining = maxTime;
+    }
 
     void Update()
     {
-        Debug.Log(Time.timeScale);
+        //Debug.Log(Time.timeScale);
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (paused == false)            
@@ -26,6 +34,12 @@ public class GameManager : MonoBehaviour
                 paused = false;
             }
 
+        }
+        timeRemaining -= Time.deltaTime;
+
+        if (timeRemaining <= 0)
+        {
+            restart();
         }
     }
 

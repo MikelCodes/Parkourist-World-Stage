@@ -34,9 +34,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float maxSpeed = 30f;
 
-    //making a vector 3 for direction of ground
-    private Vector3 hitDir, leftHit, rightHit, forwardHit, backwardsHit;
-
     //is player looking to the right?
     public bool lookingRight = true;
     //is player next too a wall?
@@ -54,15 +51,12 @@ public class PlayerMovement : MonoBehaviour
     private float attachTime;
     private bool canAttach;
     private bool wallAhead;
+    private bool jumped;
+    private float jumpTimer;
 
     void Start()
     {
         //seting direction of raycasts, one every direction except up
-        hitDir = new Vector3(0, -90, 0);
-        leftHit = new Vector3(0, 0, -90); 
-        rightHit = new Vector3(0, 0, 90); 
-        forwardHit = new Vector3(90, 0, 0); 
-        backwardsHit = new Vector3(-90, 0, 0);
         attachTime = attachMaxTime;
         attachBar.gameObject.SetActive(false);
     }
@@ -94,14 +88,21 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
+
+        if (jumpTimer <= 0)
+        {
+            jumped = false;
+        }
+        else
+        { 
+            jumpTimer -= Time.deltaTime; 
+        }
         //Debug.Log(attachTime);        
     }
 
     //keyPressed
     void keyPressed()
     {
-        RaycastHit floor;   
-
             //if pressing forward key
             if (Input.GetKey(forward))
         {
@@ -151,7 +152,7 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit wall;
 
         //raycasts to check if there is a wall next to the player ( can be optomised)
-        if (Physics.Raycast(rb.transform.position, leftHit, out wall, groundDist))
+        if (Physics.Raycast(rb.transform.position, -transform.right, out wall, groundDist))
         {
             if (wall.transform.tag == "wall")
             {
@@ -160,28 +161,28 @@ public class PlayerMovement : MonoBehaviour
                 wallAhead = false;
             }
         }
-        if (Physics.Raycast(rb.transform.position, rightHit, out wall, groundDist))
+        if (Physics.Raycast(rb.transform.position, transform.right, out wall, groundDist))
+        {
+            if (wall.transform.tag == "wall")
+            {
+                foundWall = true;
+                wallAhead = false;
+            }
+        }
+        if (Physics.Raycast(rb.transform.position, -transform.forward, out wall, groundDist))
+        {
+            if (wall.transform.tag == "wall")
+            {
+                foundWall = true;
+                wallAhead = false;
+            }
+        }
+        if (Physics.Raycast(rb.transform.position, transform.forward, out wall, groundDist))
         {
             if (wall.transform.tag == "wall")
             {
                 foundWall = true;
                 wallAhead = true;
-            }
-        }
-        if (Physics.Raycast(rb.transform.position, backwardsHit, out wall, groundDist))
-        {
-            if (wall.transform.tag == "wall")
-            {
-                foundWall = true;
-                wallAhead = false;
-            }
-        }
-        if (Physics.Raycast(rb.transform.position, forwardHit, out wall, groundDist))
-        {
-            if (wall.transform.tag == "wall")
-            {
-                foundWall = true;
-                wallAhead = false;
             }
         }
 
@@ -203,6 +204,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //stores raycast hit data in 'floor'
+        RaycastHit floor;
 
         //if pressing jump key
         if (Input.GetKey(jump))
@@ -212,21 +214,36 @@ public class PlayerMovement : MonoBehaviour
             {
                 //jumps
             
-                rb.AddForce(Vector3.up * jumpHeight);
+                rb.AddForce(Vector3.up * jumpHeight/30);
+                attachTime -= 0.001f;
             }
             //run raycast to check for ground
+
             else if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
             {
                 if (floor.transform.tag == "floor" || floor.transform.tag == "wall")
                 {
-                    //jumps
+                    if (jumped == false)
+                    {
+                        //jumps
 
-                    rb.AddForce(Vector3.up * jumpHeight);
-                    attachTime = attachMaxTime;
+                        rb.AddForce(Vector3.up * jumpHeight);
+                        
+                        jumped = true;
+                        jumpTimer = 0.2f;
+                    }
                 }
             }
-
         }
+
+        if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
+        {
+            if (floor.transform.tag == "floor" || floor.transform.tag == "wall")
+            {
+                attachTime = attachMaxTime;
+            }
+        }
+           
 
     }
 }
