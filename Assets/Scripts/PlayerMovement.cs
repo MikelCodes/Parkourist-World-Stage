@@ -73,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (onWall == true)
         {
-            if (rb.velocity.magnitude > maxSpeed/2)
+            if (rb.velocity.magnitude > maxSpeed/1.5f)
             {
                 rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed/2);
             }
@@ -103,8 +103,8 @@ public class PlayerMovement : MonoBehaviour
     //keyPressed
     void keyPressed()
     {
-            //if pressing forward key
-            if (Input.GetKey(forward))
+        //if pressing forward key
+        if (Input.GetKey(forward))
         {
             if (lookingRight == false)
             {
@@ -213,8 +213,8 @@ public class PlayerMovement : MonoBehaviour
             if (foundWall == true && onWall == true)
             {
                 //jumps
-            
-                rb.AddForce(Vector3.up * jumpHeight/30);
+
+                rb.AddForce(Vector3.up * jumpHeight / 30);
                 attachTime -= 0.001f;
             }
             //run raycast to check for ground
@@ -228,22 +228,13 @@ public class PlayerMovement : MonoBehaviour
                         //jumps
 
                         rb.AddForce(Vector3.up * jumpHeight);
-                        
+
                         jumped = true;
                         jumpTimer = 0.2f;
                     }
+                    attachTime = attachMaxTime;
                 }
             }
         }
-
-        if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
-        {
-            if (floor.transform.tag == "floor" || floor.transform.tag == "wall")
-            {
-                attachTime = attachMaxTime;
-            }
-        }
-           
-
     }
 }
