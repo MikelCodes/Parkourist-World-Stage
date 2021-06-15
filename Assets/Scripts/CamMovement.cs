@@ -20,31 +20,31 @@ public class CamMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        offset = player.GetComponent<PlayerMovement>().yAngle / 90;
-        if (offset > 2 || offset < -2)
+        offset = player.GetComponent<PlayerMovement>().yAngle;
+        if (offset > 180 || offset < -180)
         {
             offset /= 2;
         }
 
-        if (offset <= 1 && offset >= 0)
+        if (offset <= 90 && offset >= -90)
         {
-            z = offset * -distAway;
-            x = distAway - (distAway * offset);
+            z = offset/90 * -distAway;
+            x = distAway - (distAway * offset /90);
         }
-        else if (offset >= -1 && offset <= 0)
+        else if (offset >= -90 && offset <= 90)
         {
-            z = (offset * -distAway);
-            x = (-distAway + (-distAway * offset));
+            z = (offset * -distAway / 90);
+            x = (-distAway + (-distAway * offset / 90));
         }
-        else if (offset > 1)
+        else if (offset > 90)
         {
-            x = -offset / 2 * distAway;
-            z = distAway - (distAway * -offset / 2);
+            x = -offset / 90 - 1 * distAway ;
+            z = -distAway + ( -offset / 90 - 1 * distAway);
         }
-        else if (offset < -1)
+        else if (offset < -90)
         {
-            z = (offset/ 2 * -distAway);
-            x = (-distAway + (-distAway * offset / 2));
+            z = (offset/ 2 * -distAway / 90);
+            x = (-distAway + (-distAway * offset / 2 / 90));
         }
 
         transform.position = new Vector3(player.transform.position.x + x, player.transform.position.y + y, player.transform.position.z + z);
