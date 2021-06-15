@@ -229,7 +229,7 @@ public class PlayerMovement : MonoBehaviour
                 //jumps
 
                 rb.AddForce(Vector3.up * jumpHeight/2);
-                attachTime -= 0.005f;
+                attachTime -= 0.01f;
             }
             //run raycast to check for ground
 

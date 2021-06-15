@@ -33,8 +33,8 @@ public class CamMovement : MonoBehaviour
         }
         else if (offset >= -1 && offset <= 0)
         {
-            z = -(offset * distAway);
-            x = -(distAway + (distAway * offset));
+            z = (offset * -distAway);
+            x = (-distAway + (-distAway * offset));
         }
         else if (offset > 1)
         {
@@ -43,8 +43,8 @@ public class CamMovement : MonoBehaviour
         }
         else if (offset < -1)
         {
-            x = offset / 2 * distAway;
-            z = distAway - (distAway * offset / 2);
+            z = (offset/ 2 * -distAway);
+            x = (-distAway + (-distAway * offset / 2));
         }
 
         transform.position = new Vector3(player.transform.position.x + x, player.transform.position.y + y, player.transform.position.z + z);
