@@ -32,7 +32,7 @@ public class PlayerMovement : MonoBehaviour
     private float jumpHeight = 1600;
     //setting the maximum speed of any character
     [SerializeField]
-    private float maxSpeed = 30f;
+    private float maxSpeed = 40f;
 
     //is player looking to the right?
     public bool lookingRight = true;
@@ -43,14 +43,18 @@ public class PlayerMovement : MonoBehaviour
     //angle ontop of intial angle
     public float yAngle;
 
+    //veriables for wall riding limitations
     [SerializeField]
     private Slider attachBar;
     [SerializeField]
     private float attachMaxTime;
 
-    private float attachTime;
-    private bool canAttach;
+    public float attachTime;
+
+    //safeguard against sticking to a wall
     private bool wallAhead;
+
+    //makes sure that jump hight can't be highter then set by preventing player from jumping once a frame
     private bool jumped;
     private float jumpTimer;
 
@@ -63,25 +67,15 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        //makes sure player falls
-        rb.AddForce(Vector3.down * 0.4f);
+        //resets rotation when it doesn't matter
+        if (yAngle/360 == 1 || yAngle/-360 == 1)
+        {
+            yAngle = 0;
+        }
+        
 
         //run keyPressed
         keyPressed();
-
-        // Limiting Speed, slows you down more if your on a wall
-
-        if (onWall == true)
-        {
-            if (rb.velocity.magnitude > maxSpeed/1.5f)
-            {
-                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed/2);
-            }
-        }
-        else if (rb.velocity.magnitude > maxSpeed)
-            {
-                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
-            }
 
         //makes player deattach from the wall
         if (rb.constraints == RigidbodyConstraints.FreezePositionY)
@@ -89,15 +83,32 @@ public class PlayerMovement : MonoBehaviour
             rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
 
+        //prevents player from jumping once a frame
         if (jumpTimer <= 0)
         {
             jumped = false;
         }
         else
         { 
-            jumpTimer -= Time.deltaTime; 
+            jumpTimer -= Time.deltaTime;
+
+            // Limiting Speed, slows you down more if your in the air/ wall running
+
+            if (onWall == true)
+            {
+                if (rb.velocity.magnitude > maxSpeed / 1.5f)
+                {
+                    rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed / 2);
+                }
+            }
+            else if (rb.velocity.magnitude > maxSpeed)
+            {
+                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+            }
         }
         //Debug.Log(attachTime);        
+
+        gravity(1);
     }
 
     //keyPressed
@@ -112,13 +123,14 @@ public class PlayerMovement : MonoBehaviour
                 //Makes player look right
                 transform.rotation = Quaternion.Euler(0, 0 + yAngle, 0);
             }
+            //safeguard against sticking to a wall
             if (wallAhead == true)
             {
-                rb.AddForce(transform.forward * moveSpeed / 2);
+                rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
             }
             else
             {
-                rb.AddForce(transform.forward * moveSpeed);
+                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime);
             }
 
             //Debug.Log(transform.rotation.y);
@@ -134,13 +146,15 @@ public class PlayerMovement : MonoBehaviour
                 //Makes player look left
                 transform.rotation = Quaternion.Euler(0, 180 + yAngle, 0);
             }
+
+            //safeguard against sticking to a wall
             if (wallAhead == true)
             {
-                rb.AddForce(transform.forward * moveSpeed / 2);
+                rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
             }
             else
             {
-                rb.AddForce(transform.forward * moveSpeed);
+                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime);
             }
             //Debug.Log(transform.rotation.y);
         }
@@ -214,8 +228,8 @@ public class PlayerMovement : MonoBehaviour
             {
                 //jumps
 
-                rb.AddForce(Vector3.up * jumpHeight / 30);
-                attachTime -= 0.001f;
+                rb.AddForce(Vector3.up * jumpHeight/2);
+                attachTime -= 0.005f;
             }
             //run raycast to check for ground
 
@@ -230,11 +244,22 @@ public class PlayerMovement : MonoBehaviour
                         rb.AddForce(Vector3.up * jumpHeight);
 
                         jumped = true;
-                        jumpTimer = 0.2f;
+                        jumpTimer = 1;
                     }
-                    attachTime = attachMaxTime;
                 }
             }
         }
+        if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
+        {
+                attachTime = attachMaxTime;
+        }
+        else
+        {
+            gravity(0.5f);
+        }
+    }
+    private void gravity(float multiplier)
+    {
+        rb.AddForce(-transform.up * 9.807f * Time.deltaTime * multiplier, ForceMode.Impulse);
     }
 }

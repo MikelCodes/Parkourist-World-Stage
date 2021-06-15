@@ -8,10 +8,10 @@ public class GameManager : MonoBehaviour
 
     bool paused = false;
     public float score;
-    protected float timeRemaining;
+    public float timeRemaining;
 
     [SerializeField]
-    protected int maxTime;
+    public int maxTime;
 
     private void Start()
     {
