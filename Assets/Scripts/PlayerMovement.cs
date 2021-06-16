@@ -66,6 +66,9 @@ public class PlayerMovement : MonoBehaviour
     private float jumpTimer;
     private float wallJumpTimer;
 
+    //is player in the air?
+    private bool inAir;
+
     //--------------------------------------------------------------------------------------------------------------------------
 
     //for the inputs to be stored and exported
@@ -166,6 +169,10 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
             }
+            else if (inAir == false)
+            {
+                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 1.25f);
+            }
             else
             {
                 rb.AddForce(transform.forward * moveSpeed * Time.deltaTime);
@@ -197,6 +204,10 @@ public class PlayerMovement : MonoBehaviour
             if (wallAhead == true)
             {
                 rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
+            }
+            else if (inAir == false)
+            {
+                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 1.25f);
             }
             else
             {
@@ -338,10 +349,12 @@ public class PlayerMovement : MonoBehaviour
         if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
         {
                 attachTime = attachMaxTime;
+            inAir = false;
         }
         else
         {
             gravity(1.2f);
+            inAir = true;
         }
 
         //--------------------------------------------------------------------------------------------------------------------------
@@ -393,13 +406,7 @@ public class PlayerMovement : MonoBehaviour
             //right left right jump
             else if (moveBank[i] == "jump" && moveBank[i+1] == "right" && moveBank[i+2] == "left" && moveBank[i+3] == "right")
             {
-                gm.score += 8;
-                clearArray();
-            }
-            //right wallRun wallJump right
-            else if (moveBank[i] == "right" && moveBank[i + 1] == "wallJump" && moveBank[i + 2] == "wallRun" && moveBank[i + 3] == "right")
-            {
-                gm.score += 15;
+                gm.score += 10;
                 clearArray();
             }
             //Debug.Log(moveBank[i] + moveBank[i + 1] + moveBank[i + 2] + moveBank[i + 3]);

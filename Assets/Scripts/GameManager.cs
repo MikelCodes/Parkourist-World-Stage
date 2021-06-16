@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         timeRemaining = maxTime;
+        Application.targetFrameRate = 60;
     }
 
     void Update()
