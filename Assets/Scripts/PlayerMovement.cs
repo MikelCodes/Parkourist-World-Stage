@@ -17,7 +17,12 @@ public class PlayerMovement : MonoBehaviour
     KeyCode jump = KeyCode.W;
     //wall climb key
     [SerializeField]
-    KeyCode wallGrab = KeyCode.Space;
+    KeyCode wallGrab = KeyCode.Space;    
+    // the key to perform a trick
+    [SerializeField]
+    KeyCode trickKey = KeyCode.RightShift;
+
+    //--------------------------------------------------------------------------------------------------------------------------
 
     //reference to rigidbody
     [SerializeField]
@@ -39,9 +44,11 @@ public class PlayerMovement : MonoBehaviour
     //is player next too a wall?
     private bool foundWall;
     //is the player on a wall?
-    private bool onWall;
+    public bool onWall;
     //angle ontop of intial angle
     public float yAngle;
+
+    //--------------------------------------------------------------------------------------------------------------------------
 
     //veriables for wall riding limitations
     [SerializeField]
@@ -57,13 +64,29 @@ public class PlayerMovement : MonoBehaviour
     //makes sure that jump hight can't be highter then set by preventing player from jumping once a frame
     private bool jumped;
     private float jumpTimer;
+    private float wallJumpTimer;
+
+    //--------------------------------------------------------------------------------------------------------------------------
+
+    //for the inputs to be stored and exported
+    public string[] moveBank = new string[8];
+
+    //to prevent double inputs to rapidly, I am using a float switch.
+    private float arrayCooldown;
+
+    // get game manager
+    private GameManager gm;
+    //--------------------------------------------------------------------------------------------------------------------------
 
     void Start()
     {
+        gm = this.gameObject.GetComponent<GameManager>();
         //seting direction of raycasts, one every direction except up
         attachTime = attachMaxTime;
         attachBar.gameObject.SetActive(false);
     }
+
+    //--------------------------------------------------------------------------------------------------------------------------
 
     void Update()
     {
@@ -72,16 +95,20 @@ public class PlayerMovement : MonoBehaviour
         {
             yAngle = 0;
         }
-        
+        //--------------------------------------------------------------------------------------------------------------------------
 
         //run keyPressed
         keyPressed();
+
+        //--------------------------------------------------------------------------------------------------------------------------
 
         //makes player deattach from the wall
         if (rb.constraints == RigidbodyConstraints.FreezePositionY)
         {
             rb.constraints = RigidbodyConstraints.FreezeRotation;
         }
+
+        //--------------------------------------------------------------------------------------------------------------------------
 
         //prevents player from jumping once a frame
         if (jumpTimer <= 0)
@@ -91,29 +118,40 @@ public class PlayerMovement : MonoBehaviour
         else
         { 
             jumpTimer -= Time.deltaTime;
+        }
+        //Debug.Log(attachTime);    
 
-            // Limiting Speed, slows you down more if your in the air/ wall running
+        //--------------------------------------------------------------------------------------------------------------------------
 
-            if (onWall == true)
+        // Limiting Speed, slows you down more if your in the air/ wall running
+
+        if (onWall == true)
+        {
+            if (rb.velocity.magnitude > maxSpeed / 1.5f)
             {
-                if (rb.velocity.magnitude > maxSpeed / 1.5f)
-                {
-                    rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed / 2);
-                }
-            }
-            else if (rb.velocity.magnitude > maxSpeed)
-            {
-                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+                rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed / 2);
             }
         }
-        //Debug.Log(attachTime);        
+        else if (rb.velocity.magnitude > maxSpeed)
+        {
+            rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+        }
 
-        gravity(1);
+        gravity(2);
+
+        //--------------------------------------------------------------------------------------------------------------------------
+
+        arrayCooldown -= Time.deltaTime;
+        wallJumpTimer -= Time.deltaTime;
     }
+
+    //--------------------------------------------------------------------------------------------------------------------------
 
     //keyPressed
     void keyPressed()
     {
+        //--------------------------------------------------------------------------------------------------------------------------
+
         //if pressing forward key
         if (Input.GetKey(forward))
         {
@@ -135,7 +173,15 @@ public class PlayerMovement : MonoBehaviour
 
             //Debug.Log(transform.rotation.y);
 
+
+            if (moveBank[0] != "right" || arrayCooldown <= 0)
+            {
+                listUpdate("right");
+                arrayCooldown = 1;
+            }
         }
+
+        //--------------------------------------------------------------------------------------------------------------------------
 
         //if pressing backwards key
         if (Input.GetKey(backwards))
@@ -157,11 +203,21 @@ public class PlayerMovement : MonoBehaviour
                 rb.AddForce(transform.forward * moveSpeed * Time.deltaTime);
             }
             //Debug.Log(transform.rotation.y);
+
+
+            if (moveBank[0] != "left" || arrayCooldown <= 0)
+            {
+                listUpdate("left");
+                arrayCooldown = 1;
+            }
+            
         }
+
+        //--------------------------------------------------------------------------------------------------------------------------
 
         foundWall = false;
         onWall = false;
-
+        
         //stores raycast hit data in 'wall'
         RaycastHit wall;
 
@@ -200,7 +256,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        //set the player to the wall
+        //set the player to attach to the wall
         if (Input.GetKey(wallGrab) && foundWall == true)
         {
             if (attachTime >= 0)
@@ -211,11 +267,24 @@ public class PlayerMovement : MonoBehaviour
                 attachTime -= Time.deltaTime;
                 attachBar.value = attachTime / attachMaxTime;
             }
+
+            if (moveBank[0] != "wallRun" && moveBank[0] != "right" && moveBank[0] != "left")
+            {
+                listUpdate("wallRun");
+                arrayCooldown = 1;
+            }
+            if (arrayCooldown <= 1)
+            {
+                listUpdate("wallRun");
+            }
+            
         }
         else
         {
             attachBar.gameObject.SetActive(false);
         }
+
+        //--------------------------------------------------------------------------------------------------------------------------
 
         //stores raycast hit data in 'floor'
         RaycastHit floor;
@@ -227,9 +296,18 @@ public class PlayerMovement : MonoBehaviour
             if (foundWall == true && onWall == true)
             {
                 //jumps
+                if (wallJumpTimer < 0)
+                { 
+                    rb.AddForce(Vector3.up * jumpHeight / 60, ForceMode.Impulse);
+                    attachTime -= 0.015f;
 
-                rb.AddForce(Vector3.up * jumpHeight/2);
-                attachTime -= 0.01f;
+                    if (moveBank[0] != "wallJump" || arrayCooldown <= 0)
+                    {
+                        listUpdate("wallJump");
+                        arrayCooldown = 1;
+                    }
+                    wallJumpTimer = 0.01f;
+                }
             }
             //run raycast to check for ground
 
@@ -245,21 +323,98 @@ public class PlayerMovement : MonoBehaviour
 
                         jumped = true;
                         jumpTimer = 1;
+                        if (moveBank[0] != "jump" || arrayCooldown <= 0)
+                        {
+                            listUpdate("jump");
+                            arrayCooldown = 1;
+                        }
                     }
                 }
             }
         }
+
+        //--------------------------------------------------------------------------------------------------------------------------
+        
         if (Physics.Raycast(rb.transform.position, Vector3.down, out floor, groundDist))
         {
                 attachTime = attachMaxTime;
         }
         else
         {
-            gravity(0.5f);
+            gravity(1.2f);
+        }
+
+        //--------------------------------------------------------------------------------------------------------------------------
+
+        if (Input.GetKey(trickKey))
+        {
+            checkList();
         }
     }
+
+    //--------------------------------------------------------------------------------------------------------------------------
+
     private void gravity(float multiplier)
     {
         rb.AddForce(-transform.up * 9.807f * Time.deltaTime * multiplier, ForceMode.Impulse);
     }
+
+    //--------------------------------------------------------------------------------------------------------------------------
+
+        //sets list to make verable 2 veriable 3 and 3 to 4 and so on. Adds in veriable 0 to finish off
+    private void listUpdate(string value)
+    {
+        string tempString;
+
+        for (int i = 6; i > -1; i--)
+        {
+            tempString = moveBank[i];
+            moveBank[i+1] = tempString;
+            //Debug.Log(moveBank[i]);
+        }
+
+        moveBank[0] = value;
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------
+
+    //check the list for combo matches
+    private void checkList()
+    {
+        // for 4 value combos
+        for (int i = 0; i < 3; i++)
+        {
+            //left right left right
+            if (moveBank[i] == "right" && moveBank[i+1] == "left" && moveBank[i+2] == "right" && moveBank[i+3] == "left")
+            {
+                gm.score += 5;
+                clearArray();
+            }
+            //right left right jump
+            else if (moveBank[i] == "jump" && moveBank[i+1] == "right" && moveBank[i+2] == "left" && moveBank[i+3] == "right")
+            {
+                gm.score += 8;
+                clearArray();
+            }
+            //right wallRun wallJump right
+            else if (moveBank[i] == "right" && moveBank[i + 1] == "wallJump" && moveBank[i + 2] == "wallRun" && moveBank[i + 3] == "right")
+            {
+                gm.score += 15;
+                clearArray();
+            }
+            //Debug.Log(moveBank[i] + moveBank[i + 1] + moveBank[i + 2] + moveBank[i + 3]);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------
+
+    //clear the array of all veriables, basically a combo reset
+    private void clearArray()
+    {
+        for (int i = 7; i > -1; i--)
+        {
+            moveBank[i] = null;
+        }
+    }
 }
+  
