@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     public int maxTime;
+
+    [SerializeField]
+    private Text tutorial;
 
     private void Start()
     {
@@ -41,6 +45,10 @@ public class GameManager : MonoBehaviour
         if (timeRemaining <= 0)
         {
             restart();
+        }
+        else if (timeRemaining < maxTime -10)
+        {
+            tutorial.text = "";
         }
     }
 
