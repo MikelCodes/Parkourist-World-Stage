@@ -93,7 +93,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        //resets rotation when it doesn't matter
+        //resets rotation when it is at 360
         if (yAngle/360 == 1 || yAngle/-360 == 1)
         {
             yAngle = 0;
@@ -158,21 +158,25 @@ public class PlayerMovement : MonoBehaviour
         //if pressing forward key
         if (Input.GetKey(forward))
         {
+
+            //set direction player is looking towards to the right of the screen
             if (lookingRight == false)
             {
                 lookingRight = true;
-                //Makes player look right
                 transform.rotation = Quaternion.Euler(0, 0 + yAngle, 0);
             }
-            //safeguard against sticking to a wall
+
+            //safeguard against sticking to a wall without consuming wall run meter
             if (wallAhead == true)
             {
                 rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
             }
-            else if (inAir == false)
+            //limitation for air movement, making it 0.75 of normal movement
+            else if (inAir == true)
             {
-                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 1.25f);
+                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 0.75f);
             }
+            //If none of the aboce are correct, do it normally
             else
             {
                 rb.AddForce(transform.forward * moveSpeed * Time.deltaTime);
@@ -193,22 +197,24 @@ public class PlayerMovement : MonoBehaviour
         //if pressing backwards key
         if (Input.GetKey(backwards))
         {
+            //set direction player is looking towards to the left of the screen
             if (lookingRight == true)
             {
                 lookingRight = false;
-                //Makes player look left
                 transform.rotation = Quaternion.Euler(0, 180 + yAngle, 0);
             }
 
-            //safeguard against sticking to a wall
+            //safeguard against sticking to a wall without consuming wall run meter
             if (wallAhead == true)
             {
                 rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
             }
-            else if (inAir == false)
+            //limitation for air movement, making it 0.75 of normal movement
+            else if (inAir == true)
             {
-                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 1.25f);
+                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 0.75f);
             }
+            //If none of the aboce are correct, do it normally
             else
             {
                 rb.AddForce(transform.forward * moveSpeed * Time.deltaTime);
