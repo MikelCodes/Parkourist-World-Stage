@@ -171,11 +171,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
             }
-            //limitation for air movement, making it 0.75 of normal movement
-            else if (inAir == true)
-            {
-                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 0.75f);
-            }
             //If none of the aboce are correct, do it normally
             else
             {
@@ -208,11 +203,6 @@ public class PlayerMovement : MonoBehaviour
             if (wallAhead == true)
             {
                 rb.AddForce(transform.forward * moveSpeed / 2 * Time.deltaTime);
-            }
-            //limitation for air movement, making it 0.75 of normal movement
-            else if (inAir == true)
-            {
-                rb.AddForce(transform.forward * moveSpeed * Time.deltaTime * 0.75f);
             }
             //If none of the aboce are correct, do it normally
             else
@@ -316,7 +306,7 @@ public class PlayerMovement : MonoBehaviour
                 if (wallJumpTimer < 0)
                 { 
                     rb.AddForce(Vector3.up * jumpHeight / 60, ForceMode.Impulse);
-                    attachTime -= 0.015f;
+                    attachTime -= 0.02f;
 
                     if (moveBank[0] != "wallJump" || arrayCooldown <= 0)
                     {

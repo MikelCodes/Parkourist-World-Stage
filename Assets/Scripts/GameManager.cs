@@ -16,11 +16,19 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Text tutorial;
+    [SerializeField]
+    private Text tutorial2;
+    [SerializeField]
+    private Text tutorial3;
+
+    private bool firstTutorial = false;
+    private float tempValue;
 
     private void Start()
     {
         timeRemaining = maxTime;
         Application.targetFrameRate = 60;
+        tutorial3.enabled = false;
     }
 
     void Update()
@@ -46,10 +54,28 @@ public class GameManager : MonoBehaviour
         {
             restart();
         }
-        else if (timeRemaining < maxTime -10)
+        else if (timeRemaining < maxTime - 5)
         {
-            tutorial.text = "";
+            tutorial.enabled = false;
+            tutorial2.enabled = false;
+            
         }
+
+        if (firstTutorial == false)
+        {
+            if (Input.GetKey(KeyCode.Space))
+            {
+                firstTutorial = true;
+                tutorial3.enabled = true;
+                tempValue = timeRemaining;
+            }
+        }
+        else if (timeRemaining <= tempValue - 2)
+        {
+            tutorial3.enabled = false;
+        }
+
+
     }
 
     public void restart()
